@@ -19,6 +19,12 @@
       "jest-extended/all"
     ],
     "testEnvironment": "node",
-    "transform": {}
+    "transform": {},
+    "coverageReporters": [
+      "json",
+      "text",
+      "lcov",
+      "clover"
+    ]
   }
 }
