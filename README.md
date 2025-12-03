@@ -12,3 +12,7 @@ Individuals who remove or modify the license file will also carry the consequenc
 1. Clone the repository
 2. Run npm install
 3. To run tests, use command "npm test"
+
+## Test coverage
+
+[![Coverage Status](https://coveralls.io/repos/github/Susahaat/software-testing/badge.svg?branch=main)](https://coveralls.io/github/Susahaat/software-testing?branch=main)
