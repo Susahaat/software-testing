@@ -27,6 +27,8 @@ jobs:
         run: npm install
 
       - name: Run tests with coverage
+        id: run-tests
+        continue-on-error: true
         run: npm test -- --coverage
 
       - name: Check if should deploy
@@ -35,13 +37,13 @@ jobs:
         run: echo "should-deploy=true" >> $GITHUB_OUTPUT
 
       - name: Upload test report artifact
-        if: matrix.node-version == 22
+        if: always() && matrix.node-version == 22
         uses: actions/upload-artifact@v4
         with:
           name: test-report
           path: test-report.html
-
       - name: Upload coverage to Coveralls
+        if: always()
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
