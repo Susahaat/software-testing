@@ -2,7 +2,7 @@ name: CI/CD pipeline
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
 
 jobs:
   tests:
@@ -11,6 +11,8 @@ jobs:
     strategy:
       matrix:
         node-version: [14, 22]
+    outputs:
+      should-deploy: ${{ steps.check-deploy.outputs.should-deploy }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -19,7 +21,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
@@ -27,8 +29,43 @@ jobs:
       - name: Run tests with coverage
         run: npm test -- --coverage
 
+      - name: Check if should deploy
+        id: check-deploy
+        if: matrix.node-version == 22
+        run: echo "should-deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Upload test report artifact
+        if: matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.html
+
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coverage/lcov.info
+
+  deploy-report:
+    name: Deploy test report to GitHub Pages
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Download test report
+        uses: actions/download-artifact@v4
+        with:
+          name: test-report
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
